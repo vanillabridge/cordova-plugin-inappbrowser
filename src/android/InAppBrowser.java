@@ -1112,6 +1112,11 @@ public class InAppBrowser extends CordovaPlugin {
                 }
             }
             // Test for whitelisted custom scheme names like mycoolapp:// or twitteroauthresponse:// (Twitter Oauth Response)
+            else if (url.startsWith("vanillabridge")) {
+              Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+              cordova.getActivity().startActivity(intent);
+              return true;
+            }
             else if (!url.startsWith("http:") && !url.startsWith("https:") && url.matches("^[A-Za-z0-9+.-]*://.*?$")) {
                 if (allowedSchemes == null) {
                     String allowed = preferences.getString("AllowedSchemes", null);
