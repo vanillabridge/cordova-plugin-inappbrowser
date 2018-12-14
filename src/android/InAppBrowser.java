@@ -1117,7 +1117,7 @@ public class InAppBrowser extends CordovaPlugin {
               cordova.getActivity().startActivity(intent);
               return true;
             }
-            else if (!url.startsWith("http:") && !url.startsWith("https:") && !url.startsWith("javascript:")) {
+            else if (!url.startsWith("http:") && !url.startsWith("https:") && url.matches("^[A-Za-z0-9+.-]*://.*?$")) {
                 //3rd-party앱에 대한 URL scheme 대응
                 Intent intent = null;
 
