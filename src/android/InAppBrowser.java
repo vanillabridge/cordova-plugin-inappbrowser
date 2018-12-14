@@ -1118,53 +1118,27 @@ public class InAppBrowser extends CordovaPlugin {
               return true;
             }
             else if (!url.startsWith("http:") && !url.startsWith("https:") && url.matches("^[A-Za-z0-9+.-]*://.*?$")) {
-                //3rd-party앱에 대한 URL scheme 대응
-                Intent intent = null;
-
-                try {
-                    intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME); //IntentURI처리
-                    Uri uri = Uri.parse(intent.getDataString());
-
-                    activity.startActivity(new Intent(Intent.ACTION_VIEW, uri));
-                    return true;
-                } catch (URISyntaxException ex) {
-                    return false;
-                } catch (ActivityNotFoundException e) {
-                    if ( intent == null )	return false;
-
-                    //설치되지 않은 앱에 대해 market이동 처리
-                    if ( handleNotFoundPaymentScheme(intent.getScheme()) )	return true;
-
-                    //handleNotFoundPaymentScheme()에서 처리되지 않은 것 중, url로부터 package정보를 추출할 수 있는 경우 market이동 처리
-                    String packageName = intent.getPackage();
-                    if (packageName != null) {
-                        activity.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + packageName)));
-                        return true;
+                if (allowedSchemes == null) {
+                    String allowed = preferences.getString("AllowedSchemes", null);
+                    if(allowed != null) {
+                        allowedSchemes = allowed.split(",");
                     }
-
-                    return false;
                 }
-                // if (allowedSchemes == null) {
-                //     String allowed = preferences.getString("AllowedSchemes", null);
-                //     if(allowed != null) {
-                //         allowedSchemes = allowed.split(",");
-                //     }
-                // }
-                // if (allowedSchemes != null) {
-                //     for (String scheme : allowedSchemes) {
-                //         if (url.startsWith(scheme)) {
-                //             try {
-                //                 JSONObject obj = new JSONObject();
-                //                 obj.put("type", "customscheme");
-                //                 obj.put("url", url);
-                //                 sendUpdate(obj, true);
-                //                 return true;
-                //             } catch (JSONException ex) {
-                //                 LOG.e(LOG_TAG, "Custom Scheme URI passed in has caused a JSON error.");
-                //             }
-                //         }
-                //     }
-                // }
+                if (allowedSchemes != null) {
+                    for (String scheme : allowedSchemes) {
+                        if (url.startsWith(scheme)) {
+                            try {
+                                JSONObject obj = new JSONObject();
+                                obj.put("type", "customscheme");
+                                obj.put("url", url);
+                                sendUpdate(obj, true);
+                                return true;
+                            } catch (JSONException ex) {
+                                LOG.e(LOG_TAG, "Custom Scheme URI passed in has caused a JSON error.");
+                            }
+                        }
+                    }
+                }
             }
 
             return false;
