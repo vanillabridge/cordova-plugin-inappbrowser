@@ -1112,8 +1112,27 @@ public class InAppBrowser extends CordovaPlugin {
                 }
             }
             // Test for whitelisted custom scheme names like mycoolapp:// or twitteroauthresponse:// (Twitter Oauth Response)
-            else if (url.startsWith("vanillabridge")) {
-              Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            else if (url.startsWith("vanillabridge") || url.startsWith("supertoss")) {
+            //   Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            //   cordova.getActivity().startActivity(intent);
+            //   return true;
+              Intent intent = null;
+              try {
+                  intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
+              } catch (Exception e) {
+                  e.printStackTrace();
+              }
+              if (cordova.getActivity().getPackageManager().resolveActivity(intent, 0) == null) {
+                  String packagename = intent.getPackage();
+                  if (packagename != null) {
+                      Uri uri = Uri.parse("market://search?q=pname:" + packagename);
+                      intent = new Intent(Intent.ACTION_VIEW, uri);
+                      cordova.getActivity().startActivity(intent);
+                      return true;
+                  }
+              }
+              Uri uri = Uri.parse(intent.getDataString());
+              intent = new Intent(Intent.ACTION_VIEW, uri);
               cordova.getActivity().startActivity(intent);
               return true;
             }
